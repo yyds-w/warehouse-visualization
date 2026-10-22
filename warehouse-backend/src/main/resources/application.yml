@@ -1,0 +1,49 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: warehouse-backend
+  # ===== MySQL 数据源（当前使用）=====
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 数据库地址、账号、密码均支持环境变量覆盖；不设环境变量时使用这里的默认值（本地可直接跑）
+    url: jdbc:mysql://${DB_HOST:192.168.204.131}:${DB_PORT:3306}/warehouse_data?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+  # ===== 如需切回 H2 本地文件库，注释上面 4 行，改用下面 4 行 =====
+  #  datasource:
+  #    driver-class-name: org.h2.Driver
+  #    url: jdbc:h2:file:./data/warehouse;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+  #    username: sa
+  #    password:
+  sql:
+    init:
+      # 建表与演示数据脚本为幂等写法（IF NOT EXISTS / ON DUPLICATE KEY UPDATE），
+      # 首次启动自动建表并写入演示数据，之后重启不会重复插入、也不会清空已有数据。
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:db/schema.sql
+      data-locations: classpath:db/data.sql
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+mybatis-plus:
+  type-aliases-package: com.warehouse.entity
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+logging:
+  level:
+    com.warehouse.mapper: warn
